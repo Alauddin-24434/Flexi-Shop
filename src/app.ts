@@ -1,8 +1,9 @@
 
-import express, { Application, Request, Response }  from 'express';
+import express, { Application, NextFunction, Request, Response }  from 'express';
 import cors from 'cors';
 import dotenv  from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { globalErrorHandelelr } from './app/utills/globalErrorHandeller';
 
 dotenv.config();
 
@@ -35,6 +36,9 @@ app.use( '/' ,(req:Request, res:Response)=>{
 })
 
 
+// error handeller
+
+app.use(globalErrorHandelelr);
 
 
 export default app;
