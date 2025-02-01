@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv  from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { globalErrorHandelelr } from './app/utills/globalErrorHandeller';
+import { authRouter } from './app/modules/Auth/auth.route';
 
 dotenv.config();
 
@@ -24,6 +25,9 @@ app.use(cookieParser())
     })
  })
 
+
+// API routes
+app.use('/api', authRouter);
 
 
 //  not found page

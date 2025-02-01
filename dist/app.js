@@ -8,6 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const globalErrorHandeller_1 = require("./app/utills/globalErrorHandeller");
+const auth_route_1 = require("./app/modules/Auth/auth.route");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // middleware
@@ -28,6 +29,7 @@ app.use('/', (req, res) => {
         message: "Ops! api not found",
     });
 });
+app.use('/api/v1', auth_route_1.authRouter);
 // error handeller
 app.use(globalErrorHandeller_1.globalErrorHandelelr);
 exports.default = app;
