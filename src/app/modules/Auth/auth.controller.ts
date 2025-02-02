@@ -4,43 +4,101 @@ import { catchAsync } from "../../utills/catchAsync";
 import { PrismaClient } from "@prisma/client";
 import { AppError } from "../../utills/error";
 import bcrypt from "bcryptjs";
+
+import { setTokensAndCookies } from "../../utills/setTokensAndCookies";
+import { jwtVerify } from "../../utills/jwtVerify";
+
 const prisma = new PrismaClient();
 
-
-
-
-
-
-
-// createUser
+// create user
 export const createUser = catchAsync(async (req: Request, res: Response) => {
-  const body = req.body;
-  const { email, password, role } = body;
+  // get email, password and role from request body
+  const { email, password, role } = req.body;
 
-  // isUserExist
+  // find user
   const isUserExist = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
+    where: { email },
   });
 
-  // user chek
+  // check if user already exists
   if (isUserExist) {
-    throw new AppError(400, "User already exist");
+    throw new AppError(400, "User already exists");
   }
 
+  // plan password convert to hash
   const hashPassword = await bcrypt.hash(password, 10);
 
-  // crate new user
-
+  // Create new user
   const newUser = await prisma.user.create({
     data: {
-      email: email,
+      email,
       password: hashPassword,
       role: role || "USER",
     },
   });
 
-  // sendResponse
+  // Set tokens and cookies
+  setTokensAndCookies(res, {
+    id: newUser.id,
+    email: newUser.email,
+    role: newUser.role,
+  });
+  // send response to user with user data
   sendResponse(201, true, "User created successfully", { user: newUser }, res);
+});
+
+// login user
+export const loginUser = catchAsync(async (req: Request, res: Response) => {
+  // get email and password from request body
+  const { email, password } = req.body;
+
+  // find user
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  // check if user exists
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+
+  // check if password is correct
+  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  if (!isPasswordCorrect) {
+    throw new AppError(400, "Invalid email or password");
+  }
+
+  // Set tokens and cookies
+  setTokensAndCookies(res, { id: user.id, email: user.email, role: user.role });
+
+  // send response to user with user data
+  sendResponse(200, true, "Login successful", { user }, res);
+});
+
+// refresh token
+export const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+  console.log(refreshToken);
+
+  if (!refreshToken) {
+    throw new AppError(400, "Refresh token is required");
+  }
+
+  // verify refresh token
+  const decoded = jwtVerify(refreshToken);
+
+  // find user
+  const user = await prisma.user.findUnique({
+    where: { id: (decoded as any).id },
+  });
+
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+
+  // Set tokens and cookies
+  setTokensAndCookies(res, user);
+
+  // send response to user with new access token
+  sendResponse(200, true, "Token refreshed successfully", null, res);
 });
