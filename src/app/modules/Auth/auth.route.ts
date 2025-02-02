@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import {
   createUser,
   getAllUsers,
@@ -9,12 +10,14 @@ import {
 } from "./auth.controller";
 import { verifyRoll } from "../../utills/verifyRoll";
 
+
 const router = Router();
 
 // signup route
 router.post("/signup", createUser);
 
 // login route
+
 router.post("/login", loginUser);
 
 // refresh token route
