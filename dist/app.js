@@ -22,6 +22,8 @@ app.get('/', (req, res) => {
         message: "Hello world",
     });
 });
+// API routes
+app.use('/api', auth_route_1.authRouter);
 //  not found page
 app.use('/', (req, res) => {
     res.status(404).json({
@@ -29,7 +31,6 @@ app.use('/', (req, res) => {
         message: "Ops! api not found",
     });
 });
-app.use('/api/v1', auth_route_1.authRouter);
 // error handeller
 app.use(globalErrorHandeller_1.globalErrorHandelelr);
 exports.default = app;
