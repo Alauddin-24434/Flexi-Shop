@@ -10,10 +10,10 @@ import { jwtVerify } from "../../utills/jwtVerify";
 
 const prisma = new PrismaClient();
 
-// create user
+//  --------------------1. create User --------------------------------
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   // get email, password and role from request body
-  const { email, password, role } = req.body;
+  const { email, password, ro } = req.body;
 
   // find user
   const isUserExist = await prisma.user.findUnique({
@@ -33,7 +33,6 @@ export const createUser = catchAsync(async (req: Request, res: Response) => {
     data: {
       email,
       password: hashPassword,
-      role: role || "USER",
     },
   });
 
@@ -47,7 +46,8 @@ export const createUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(201, true, "User created successfully", { user: newUser }, res);
 });
 
-// login user
+// --------------------2. login User --------------------------------
+
 export const loginUser = catchAsync(async (req: Request, res: Response) => {
   // get email and password from request body
   const { email, password } = req.body;
@@ -75,7 +75,8 @@ export const loginUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(200, true, "Login successful", { user }, res);
 });
 
-// refresh token
+// --------------------3. refresh token --------------------------------
+
 export const refreshToken = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
   console.log(refreshToken);
@@ -102,3 +103,78 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
   // send response to user with new access token
   sendResponse(200, true, "Token refreshed successfully", null, res);
 });
+
+// ---------------------4. find user by id ----------------------------
+
+export const getUserById = catchAsync(async (req: Request, res: Response) => {
+  // get user id from request params
+  const { id } = req.params;
+
+  // find user
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  // check if user exists
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+
+  // send response to user with user data
+  sendResponse(200, true, "User found", { user }, res);
+});
+
+// ---------------------5. find all users but not give roll admin or super admin ----------------------------
+
+export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+ 
+  const users = await prisma.user.findMany({
+    where: {
+      NOT: {
+        role: {
+          in: ["ADMIN", "SUPER_ADMIN"],
+        },
+      },
+    },
+  });
+
+  // send response to user with users data
+  sendResponse(200, true, "Users retrive sucessfully", { users }, res);
+});
+
+// ---------------------6. update user by id ----------------------------
+
+export const updateUserById = catchAsync(
+  async (req: Request, res: Response) => {
+    // get user id from request params
+    const { id } = req.params;
+
+    // find user
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    // check if user exists
+    if (!user) {
+      throw new AppError(404, "User not found");
+    }
+
+    // update user
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: req.body,
+    });
+
+    // send response to user with updated user data
+    sendResponse(
+      200,
+      true,
+      "User updated successfully",
+      { user: updatedUser },
+      res
+    );
+  }
+);
+
+
+
