@@ -10,6 +10,7 @@ import { jwtVerify } from "../../utills/jwtVerify";
 
 const prisma = new PrismaClient();
 
+
 //  --------------------1. create User --------------------------------
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   // get email, password and role from request body
@@ -46,6 +47,7 @@ export const createUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(201, true, "User created successfully", { user: newUser }, res);
 });
 
+
 // --------------------2. login User --------------------------------
 
 export const loginUser = catchAsync(async (req: Request, res: Response) => {
@@ -75,6 +77,7 @@ export const loginUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(200, true, "Login successful", { user }, res);
 });
 
+
 // --------------------3. refresh token --------------------------------
 
 export const refreshToken = catchAsync(async (req: Request, res: Response) => {
@@ -103,6 +106,7 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
   // send response to user with new access token
   sendResponse(200, true, "Token refreshed successfully", null, res);
 });
+
 
 // ---------------------4. find user by id ----------------------------
 
@@ -175,6 +179,7 @@ export const updateUserById = catchAsync(
     );
   }
 );
+
 
 
 
