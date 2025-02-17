@@ -24,7 +24,7 @@ const prisma = new client_1.PrismaClient();
 //  --------------------1. create User --------------------------------
 exports.createUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // get email, password and role from request body
-    const { email, password, ro } = req.body;
+    const { email, password } = req.body;
     // find user
     const isUserExist = yield prisma.user.findUnique({
         where: { email },
@@ -69,9 +69,14 @@ exports.loginUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0,
         throw new error_1.AppError(400, "Invalid email or password");
     }
     // Set tokens and cookies
-    (0, setTokensAndCookies_1.setTokensAndCookies)(res, { id: user.id, email: user.email, role: user.role });
+    const token = (0, setTokensAndCookies_1.setTokensAndCookies)(res, {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+    });
+    const { accessToken } = token;
     // send response to user with user data
-    (0, sendResponse_1.sendResponse)(200, true, "Login successful", { user }, res);
+    (0, sendResponse_1.sendResponse)(200, true, "Login successful", { user, accessToken }, res);
 }));
 // --------------------3. refresh token --------------------------------
 exports.refreshToken = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

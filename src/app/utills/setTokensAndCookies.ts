@@ -31,12 +31,7 @@ export const setTokensAndCookies = (res: Response, payload: JWTPayload) => {
     }
   );
 
-  // Set cookies accessToken and refreshToken
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 1 * 60 * 60 * 1000, // 1 hour
-  });
+
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,

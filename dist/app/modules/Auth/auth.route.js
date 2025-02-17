@@ -18,7 +18,7 @@ router.get("/user/:id", auth_controller_1.getUserById);
 // update user by id route
 router.put("/user-update/:id", auth_controller_1.updateUserById);
 // update user role only accesble  by super admin
-router.put("/user-role-update/:id", (0, verifyRoll_1.verifyRoll)(["SUPER_ADMIN"]), auth_controller_1.updateUserById);
+router.put("/user-role-update-to-admin/:id", (0, verifyRoll_1.verifyRoll)(["SUPER_ADMIN"]), auth_controller_1.updateUserById);
 // update user Existing role to new role to SELLER  accessble by super admin and admin
 router.put("/user-role-update-to-seller/:id", (0, verifyRoll_1.verifyRoll)(["SUPER_ADMIN", "ADMIN"]), auth_controller_1.updateUserById);
 exports.authRouter = router;

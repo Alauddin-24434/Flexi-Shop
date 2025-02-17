@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 //  --------------------1. create User --------------------------------
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   // get email, password and role from request body
-  const { email, password, ro } = req.body;
+  const { email, password } = req.body;
 
   // find user
   const isUserExist = await prisma.user.findUnique({
@@ -69,10 +69,14 @@ export const loginUser = catchAsync(async (req: Request, res: Response) => {
   }
 
   // Set tokens and cookies
-  setTokensAndCookies(res, { id: user.id, email: user.email, role: user.role });
-
+  const token = setTokensAndCookies(res, {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
+  const { accessToken } = token;
   // send response to user with user data
-  sendResponse(200, true, "Login successful", { user }, res);
+  sendResponse(200, true, "Login successful", { user, accessToken }, res);
 });
 
 // --------------------3. refresh token --------------------------------
@@ -127,7 +131,6 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
 // ---------------------5. find all users but not give roll admin or super admin ----------------------------
 
 export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
- 
   const users = await prisma.user.findMany({
     where: {
       NOT: {
@@ -175,6 +178,3 @@ export const updateUserById = catchAsync(
     );
   }
 );
-
-
-

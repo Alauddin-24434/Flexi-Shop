@@ -15,12 +15,6 @@ const setTokensAndCookies = (res, payload) => {
     const refreshToken = jsonwebtoken_1.default.sign({ id: payload.id, email: payload.email, role: payload.role }, config_1.default.JWT_SECRET.JWT_REFRESH_SECRET, {
         expiresIn: "7d", // 7 days
     });
-    // Set cookies accessToken and refreshToken
-    res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 1 * 60 * 60 * 1000, // 1 hour
-    });
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
