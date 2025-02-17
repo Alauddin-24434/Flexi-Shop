@@ -33,7 +33,7 @@ router.get("/user/:id", getUserById);
 router.put("/user-update/:id", updateUserById );
 
 // update user role only accesble  by super admin
-router.put("/user-role-update/:id", verifyRoll(["SUPER_ADMIN"]) ,updateUserById );
+router.put("/user-role-update-to-admin/:id", verifyRoll(["SUPER_ADMIN"]) ,updateUserById );
 
 // update user Existing role to new role to SELLER  accessble by super admin and admin
 router.put("/user-role-update-to-seller/:id", verifyRoll(["SUPER_ADMIN","ADMIN"]) ,updateUserById );
