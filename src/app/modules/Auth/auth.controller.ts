@@ -182,10 +182,3 @@ export const updateUserById = catchAsync(
     );
   }
 );
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> 691c6fcd593716f35e25feb40afadfb5609b3a69

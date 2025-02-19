@@ -12,5 +12,8 @@ router.post("/product", storage_1.upload.fields([
 ]), product_controller_1.createProduct);
 // get all products
 router.get('/products', product_controller_1.getAllProducts);
-// 
+// get product byId
+router.get('/product/:id', product_controller_1.getProductById);
+// update productBy id
+router.put('/product-update/:id', product_controller_1.updateProductById);
 exports.productRouter = router;
