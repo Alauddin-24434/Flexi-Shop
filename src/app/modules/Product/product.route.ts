@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { createProduct, getAllProducts } from "./product.controller";
+import { createProduct, getAllProducts, getProductById, updateProductById } from "./product.controller";
 
 import { zodValidationRequest } from "../../middleware/zodValidationRequest";
 import { productValidation } from "./product.validatio";
@@ -23,6 +23,9 @@ router.post(
 
 router.get('/products', getAllProducts);
 
-// 
+// get product byId
+router.get('/product/:id', getProductById )
+// update productBy id
+router.put('/product-update/:id', updateProductById)
 
 export const productRouter = router;

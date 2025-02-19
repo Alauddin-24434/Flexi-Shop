@@ -3,6 +3,7 @@ import { catchAsync } from "../../utills/catchAsync";
 import { sendResponse } from "../../utills/sendResponse";
 import { AppError } from "../../utills/error";
 import { Request, Response } from "express";
+import { getQueryOptions } from "../../utills/queryHelper";
 
 const prisma = new PrismaClient();
 
@@ -33,7 +34,7 @@ export const createProduct = catchAsync(async (req: Request, res: Response) => {
     price: parseFloat(body.price),  // ✅ Convert to number
     stock: parseInt(body.stock, 10),  // ✅ Convert to integer
     weight: parseFloat(body.weight),  // ✅ Convert to number
-    discount: parseFloat(body.discount),  // ✅ Convert to number
+    discount: parseFloat(body.discount),  
     tags: Array.isArray(body.tags) ? body.tags : JSON.parse(body.tags || "[]"),  // ✅ Convert JSON string to array
     productThumbnail: thumbnailUrl,
     productImages: additionalImagesUrls,
@@ -55,7 +56,7 @@ export const createProduct = catchAsync(async (req: Request, res: Response) => {
   const newProduct = await prisma.product.create({ data: productData });
 
   // Send response
-  sendResponse(201, true, "Product created successfully", { newProduct }, res);
+  sendResponse(201, true, "Product created successfully", {newProduct }, res);
 });
 
 
@@ -63,14 +64,55 @@ export const createProduct = catchAsync(async (req: Request, res: Response) => {
 
 export const getAllProducts = catchAsync(
   async (req: Request, res: Response) => {
-    // get all products but chek isDeleted is false
+    const { page, limit, skip, sortBy, sortOrder, categoryFilter, searchFilter } =
+      getQueryOptions(req.query);
+
+    // Default filter (সকল product আনতে হলে শুধু isDeleted: false রাখলেই হবে)
+    const filters: any = { isDeleted: false };
+
+    // যদি categoryFilter আসে এবং সেটি valid হয়, তাহলে category অনুযায়ী ফিল্টার করো
+    if (categoryFilter && typeof categoryFilter === "string") {
+      filters.category = {
+        name: {
+          contains: categoryFilter, // category নামের মধ্যে search filter match হবে
+          mode: "insensitive", // case-insensitive match হবে
+        },
+      };
+    }
+
+    // যদি searchFilter আসে এবং সেটি valid হয়, তাহলে নাম অনুযায়ী ফিল্টার করো
+    if (searchFilter && typeof searchFilter === "string") {
+      filters.name = { contains: searchFilter, mode: "insensitive" };
+    }
+
+    // Fetch products
     const products = await prisma.product.findMany({
-      where: { isDeleted: false },
+      where: filters,
+      include: {
+        category: { select: { name: true, subcategories: true } },
+      },
+      skip: skip || 0,
+      take: limit || 10,
+      orderBy: sortBy ? { [sortBy]: sortOrder || "asc" } : undefined,
     });
-    // send response to user with products data
-    sendResponse(200, true, "All products", { products }, res);
+
+    // Total product count after filtering
+    const totalProducts = await prisma.product.count({ where: filters });
+
+    sendResponse(200, true, "Products retrieved successfully", {
+      products,
+      pagination: {
+        totalProducts,
+        page,
+        limit,
+        totalPages: Math.ceil(totalProducts / (limit || 10)),
+      },
+    }, res);
   }
 );
+
+
+
 
 // --------------------3. get product by id --------------------------------
 
@@ -82,6 +124,9 @@ export const getProductById = catchAsync(
     // find product
     const product = await prisma.product.findUnique({
       where: { id },
+      include:{category:{
+        select: {name:true, subcategories:true}
+      }}
     });
 
     // check if product exists
@@ -90,7 +135,7 @@ export const getProductById = catchAsync(
     }
 
     // send response to user with product data
-    sendResponse(200, true, "Product", { product }, res);
+    sendResponse(200, true, "Product", {product }, res);
   }
 );
 
@@ -122,7 +167,7 @@ export const updateProductById = catchAsync(
       200,
       true,
       "Product updated successfully",
-      { product: updatedProduct },
+      { updatedProduct },
       res
     );
   }

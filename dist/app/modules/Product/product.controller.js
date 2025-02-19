@@ -14,6 +14,7 @@ const client_1 = require("@prisma/client");
 const catchAsync_1 = require("../../utills/catchAsync");
 const sendResponse_1 = require("../../utills/sendResponse");
 const error_1 = require("../../utills/error");
+const queryHelper_1 = require("../../utills/queryHelper");
 const prisma = new client_1.PrismaClient();
 // -----------------------1. create Product --------------------------------
 exports.createProduct = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -37,7 +38,7 @@ exports.createProduct = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(voi
         price: parseFloat(body.price), // ✅ Convert to number
         stock: parseInt(body.stock, 10), // ✅ Convert to integer
         weight: parseFloat(body.weight), // ✅ Convert to number
-        discount: parseFloat(body.discount), // ✅ Convert to number
+        discount: parseFloat(body.discount),
         tags: Array.isArray(body.tags) ? body.tags : JSON.parse(body.tags || "[]"), // ✅ Convert JSON string to array
         productThumbnail: thumbnailUrl,
         productImages: additionalImagesUrls,
@@ -61,12 +62,43 @@ exports.createProduct = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(voi
 }));
 // --------------------2. get all products --------------------------------
 exports.getAllProducts = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // get all products but chek isDeleted is false
+    const { page, limit, skip, sortBy, sortOrder, categoryFilter, searchFilter } = (0, queryHelper_1.getQueryOptions)(req.query);
+    // Default filter (সকল product আনতে হলে শুধু isDeleted: false রাখলেই হবে)
+    const filters = { isDeleted: false };
+    // যদি categoryFilter আসে এবং সেটি valid হয়, তাহলে category অনুযায়ী ফিল্টার করো
+    if (categoryFilter && typeof categoryFilter === "string") {
+        filters.category = {
+            name: {
+                contains: categoryFilter, // category নামের মধ্যে search filter match হবে
+                mode: "insensitive", // case-insensitive match হবে
+            },
+        };
+    }
+    // যদি searchFilter আসে এবং সেটি valid হয়, তাহলে নাম অনুযায়ী ফিল্টার করো
+    if (searchFilter && typeof searchFilter === "string") {
+        filters.name = { contains: searchFilter, mode: "insensitive" };
+    }
+    // Fetch products
     const products = yield prisma.product.findMany({
-        where: { isDeleted: false },
+        where: filters,
+        include: {
+            category: { select: { name: true, subcategories: true } },
+        },
+        skip: skip || 0,
+        take: limit || 10,
+        orderBy: sortBy ? { [sortBy]: sortOrder || "asc" } : undefined,
     });
-    // send response to user with products data
-    (0, sendResponse_1.sendResponse)(200, true, "All products", { products }, res);
+    // Total product count after filtering
+    const totalProducts = yield prisma.product.count({ where: filters });
+    (0, sendResponse_1.sendResponse)(200, true, "Products retrieved successfully", {
+        products,
+        pagination: {
+            totalProducts,
+            page,
+            limit,
+            totalPages: Math.ceil(totalProducts / (limit || 10)),
+        },
+    }, res);
 }));
 // --------------------3. get product by id --------------------------------
 exports.getProductById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -75,6 +107,9 @@ exports.getProductById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(vo
     // find product
     const product = yield prisma.product.findUnique({
         where: { id },
+        include: { category: {
+                select: { name: true, subcategories: true }
+            } }
     });
     // check if product exists
     if (!product) {
@@ -101,5 +136,5 @@ exports.updateProductById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter
         data: req.body,
     });
     // send response to user with updated product data
-    (0, sendResponse_1.sendResponse)(200, true, "Product updated successfully", { product: updatedProduct }, res);
+    (0, sendResponse_1.sendResponse)(200, true, "Product updated successfully", { updatedProduct }, res);
 }));

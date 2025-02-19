@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+ 
 }
 
 model User {
@@ -55,7 +55,7 @@ model Product {
   shopId           String
   isDeleted        Boolean          @default(false)
   stock            Int
-  discount         Float
+  discount         Float            @default(0)
   weight           Float
   productThumbnail String
   productImages    String[]
@@ -94,7 +94,7 @@ model Category {
 
 model FlashSale {
   id        String   @id @default(cuid())
-  productId String
+  productId String   @unique
   discount  Float
   startDate DateTime
   endDate   DateTime
