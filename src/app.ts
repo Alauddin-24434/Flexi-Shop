@@ -10,6 +10,7 @@ import { shopRouter } from "./app/modules/Shop/shop.route";
 import { productRouter } from "./app/modules/Product/product.route";
 import { categoryRouter } from "./app/modules/Category/category.route";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandeller";
+import { ReviewRouter } from "./app/modules/Review/review.route";
 
 dotenv.config();
 
@@ -94,6 +95,7 @@ app.use("/api", authRouter);
 app.use("/api", shopRouter);
 app.use("/api", categoryRouter);
 app.use("/api", productRouter);
+app.use("/api", ReviewRouter);
 
 // ✅ Handle 404 Not Found
 app.use("*", (req: Request, res: Response) => {

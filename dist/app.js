@@ -23,6 +23,7 @@ const shop_route_1 = require("./app/modules/Shop/shop.route");
 const product_route_1 = require("./app/modules/Product/product.route");
 const category_route_1 = require("./app/modules/Category/category.route");
 const globalErrorHandeller_1 = require("./app/middleware/globalErrorHandeller");
+const review_route_1 = require("./app/modules/Review/review.route");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
@@ -95,6 +96,7 @@ app.use("/api", auth_route_1.authRouter);
 app.use("/api", shop_route_1.shopRouter);
 app.use("/api", category_route_1.categoryRouter);
 app.use("/api", product_route_1.productRouter);
+app.use("/api", review_route_1.ReviewRouter);
 // ✅ Handle 404 Not Found
 app.use("*", (req, res) => {
     res.status(404).json({
