@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCategory = void 0;
+exports.getAllCetegory = exports.createCategory = void 0;
 const catchAsync_1 = require("../../utills/catchAsync");
 const client_1 = require("@prisma/client");
 const error_1 = require("../../utills/error");
@@ -34,4 +34,9 @@ exports.createCategory = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(vo
         },
     });
     (0, sendResponse_1.sendResponse)(200, true, "Category is created successfully", { category: newCategory }, res);
+}));
+// ------------------------- 2. get all getegory -------------------------------
+exports.getAllCetegory = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma.category.findMany();
+    (0, sendResponse_1.sendResponse)(200, true, "Category is retrive successfully", { result }, res);
 }));

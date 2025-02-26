@@ -1,13 +1,15 @@
 import { Router } from "express";
 
 import { verifyRoll } from "../../utills/verifyRoll";
-import { createCategory } from "./category.controller";
+import { createCategory, getAllCetegory, } from "./category.controller";
 
 
 const router=Router();
 
-// create shop route
+// create category
 router.post("/category", verifyRoll(['SELLER']), createCategory);
+// get all category
+router.get("/category", getAllCetegory);
 
 
 // export category router

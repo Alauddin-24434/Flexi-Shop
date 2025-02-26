@@ -40,3 +40,16 @@ export const createCategory = catchAsync(
     );
   }
 );
+
+// ------------------------- 2. get all getegory -------------------------------
+
+export const getAllCetegory= catchAsync(async (req:Request,res:Response)=>{
+  const result =await prisma.category.findMany();
+  sendResponse(
+    200,
+    true,
+    "Category is retrive successfully",
+    { result },
+    res
+  );
+})
